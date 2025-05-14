@@ -1,3 +1,5 @@
+@Library('jenk_lib') _
+
 pipeline {
     parameters {
         booleanParam(name: 'NEW_RUN', defaultValue: true, description: 'Whether to run or not')
@@ -26,19 +28,16 @@ pipeline {
         stage('Initialize') {
             steps {
                 script {
-                    if (!params.NEW_RUN) {
-                        currentBuild.result = 'ABORTED'
-                        error("Pipeline aborted: NEW_RUN is false")
-                    }
-                    echo "Running environment: ${params.RUN}"
+                    pipelineStages.initializePipeline()
                 }
             }
         }
 
         stage('Build') {
             steps {
-                echo "Building with Gradle"
-                sh './gradlew clean build -x test'
+                script {
+                    pipelineStages.buildApp()
+                }
             }
         }
 
@@ -47,8 +46,9 @@ pipeline {
                 expression { return params.RUN != 'prod' }
             }
             steps {
-                echo "Running tests for ${params.RUN}"
-                sh './gradlew test'
+                script {
+                    pipelineStages.runTests()
+                }
             }
         }
 
@@ -60,24 +60,9 @@ pipeline {
                 }
             }
             steps {
-                echo "Deploying ${APP_NAME} to ${DEPLOY_DIR}"
+                
                 script {
-                    def jarFile = sh(
-                        script: "ls build/libs/*.jar | head -n 1",
-                        returnStdout: true
-                    ).trim()
-
-                    echo "Found artifact: ${jarFile}"
-
-                    sh """
-                        if [ -f "${jarFile}" ]; then
-                            cp "${jarFile}" "${DEPLOY_DIR}/"
-                            echo "Deployment completed"
-                        else
-                            echo "File not found: ${jarFile}"
-                            exit 1
-                        fi
-                    """
+                    pipelineStages.deployApp()
                 }
             }
         }
