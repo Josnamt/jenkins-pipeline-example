@@ -7,7 +7,7 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk-21-local'
+        jdk 'jdk-17-local'
     }
 
     environment {
