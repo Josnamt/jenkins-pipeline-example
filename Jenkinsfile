@@ -71,7 +71,7 @@ pipeline {
     post {
         always {
             echo "Clean workspace"
-            deleteDir()
+            // deleteDir()
         }
         success {
             echo "Pipeline completed successfully"
