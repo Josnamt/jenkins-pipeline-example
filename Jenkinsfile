@@ -62,6 +62,7 @@ pipeline {
             steps {
                 
                 script {
+                    sh 'pwd'
                     pipelineStages.deployApp()
                 }
             }
